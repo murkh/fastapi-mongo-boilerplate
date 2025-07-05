@@ -1,8 +1,9 @@
 
 from fastapi import APIRouter, Depends, HTTPException
 
-from src.app.core.exceptions import InternalServerException
-from src.app.services import get_aws_storage_service, AWSStorageService
+from ...services import get_aws_storage_service
+from ...services.aws_service import AWSStorageService
+from ...core.exceptions import InternalServerException
 
 
 router = APIRouter(prefix="/aws", tags=["AWS S3"])

@@ -1,8 +1,9 @@
 from fastapi import APIRouter, Depends, HTTPException
 
-from src.app.core.exceptions import BadRequestException, InternalServerException
-from src.app.services import get_local_storage_service
-from src.app.services.local_storage import LocalStorageService
+from ...core.exceptions import BadRequestException, InternalServerException
+from ...services import get_local_storage_service
+from ...services.local_storage import LocalStorageService
+
 
 router = APIRouter(prefix="/local", tags=["LOCAL Storage"])
 
