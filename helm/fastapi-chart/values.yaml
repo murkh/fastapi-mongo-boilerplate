@@ -1,0 +1,15 @@
+replicaCount: 1
+
+image:
+  repository: fastapi-app
+  pullPolicy: IfNotPresent
+  tag: local
+
+service:
+  type: ClusterIP
+  port: 80
+
+ingress:
+  enabled: false
+
+resources: {}
