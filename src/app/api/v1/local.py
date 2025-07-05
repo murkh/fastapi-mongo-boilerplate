@@ -18,6 +18,7 @@ def list_local(path: str = "", service: LocalStorageService = Depends(get_local_
         raise InternalServerException(detail=str(e))
 
 
+
 @router.get("/download")
 def download_local(path: str = "", service: LocalStorageService = Depends(get_local_storage_service)):
     try:
@@ -26,6 +27,17 @@ def download_local(path: str = "", service: LocalStorageService = Depends(get_lo
                 detail="Incorrect Path or Path not provided")
         return service.download_file(path)
     except BadRequestException as e:
+        raise e
+    except Exception as e:
+        raise InternalServerException(detail=str(e))
+
+
+# New endpoint for nested tree
+@router.get("/tree")
+def tree_local(path: str = "", max_depth: int = 5, service: LocalStorageService = Depends(get_local_storage_service)):
+    try:
+        return service.list_directory_tree(path, max_depth=max_depth)
+    except HTTPException as e:
         raise e
     except Exception as e:
         raise InternalServerException(detail=str(e))

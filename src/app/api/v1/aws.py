@@ -24,3 +24,11 @@ def download_s3(path: str = "", service: AWSStorageService = Depends(get_aws_sto
         return {"file": file_content}
     except Exception as e:
         raise InternalServerException(detail=str(e))
+
+
+@router.get("/tree")
+def tree_s3(prefix: str = "", max_depth: int = 5, service: AWSStorageService = Depends(get_aws_storage_service)):
+    try:
+        return service.list_directory_tree(prefix, max_depth=max_depth)
+    except Exception as e:
+        raise InternalServerException(detail=str(e))
