@@ -26,7 +26,7 @@ class AWSServiceProviderSettings(CloudServiceProviderSettings):
 
 class LocalStorageProviderSettings(CloudServiceProviderSettings):
     PROVIDER_NAME: str = "local"
-    LOCAL_STORAGE_PATH: str = getenv("LOCAL_STORAGE_PATH", default="./storage")
+    LOCAL_STORAGE_PATH: str = getenv("LOCAL_STORAGE_PATH", default="/tmp")
 
 
 class EnvironmentOption(Enum):
