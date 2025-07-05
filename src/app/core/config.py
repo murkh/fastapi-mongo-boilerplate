@@ -5,8 +5,9 @@ from pydantic_settings import BaseSettings
 
 
 class AppSettings(BaseSettings):
-    APP_NAME: str = getenv("APP_NAME", default="FastAPI app")
-    APP_DESCRIPTION: str | None = getenv("APP_DESCRIPTION", default=None)
+    APP_NAME: str = getenv("APP_NAME", default="File Explorer API")
+    APP_DESCRIPTION: str | None = getenv(
+        "APP_DESCRIPTION", default="Basic App to explorer the contents of a storage provider")
     APP_VERSION: str | None = getenv("APP_VERSION", default=None)
 
 
@@ -20,6 +21,12 @@ class AWSServiceProviderSettings(CloudServiceProviderSettings):
     AWS_SECRET_ACCESS_KEY: SecretStr = SecretStr(
         getenv("AWS_SECRET_ACCESS_KEY", default=""))
     AWS_REGION: str | None = getenv("AWS_REGION", default=None)
+    AWS_S3_BUCKET_NAME: str | None = getenv("AWS_S3_BUCKET_NAME")
+
+
+class LocalStorageProviderSettings(CloudServiceProviderSettings):
+    PROVIDER_NAME: str = "local"
+    LOCAL_STORAGE_PATH: str = getenv("LOCAL_STORAGE_PATH", default="./storage")
 
 
 class EnvironmentOption(Enum):
@@ -35,6 +42,7 @@ class EnvironmentSettings(BaseSettings):
 
 class Settings(
     AppSettings,
+    LocalStorageProviderSettings,
     AWSServiceProviderSettings,
     EnvironmentSettings
 ):
