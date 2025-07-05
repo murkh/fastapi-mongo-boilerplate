@@ -35,9 +35,5 @@ COPY pyproject.toml uv.lock ./
 # Expose port for uvicorn
 EXPOSE 8000
 
-# Set environment variables
-ENV PYTHONUNBUFFERED=1 \
-    PYTHONDONTWRITEBYTECODE=1
-
 # Command to run the app
 CMD ["uvicorn", "src.app.main:app", "--host", "0.0.0.0", "--port", "8000"]
