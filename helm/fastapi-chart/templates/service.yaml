@@ -7,7 +7,7 @@ spec:
     app: fastapi-app
   ports:
     - port: {{ .Values.service.port }}
-      targetPort: 80
+      targetPort: 8000
       protocol: TCP
       name: http
   type: {{ .Values.service.type }}

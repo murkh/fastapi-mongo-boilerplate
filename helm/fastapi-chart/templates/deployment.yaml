@@ -2,19 +2,30 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: fastapi-app
+  labels:
+    app.kubernetes.io/name: fastapi-chart
+    app.kubernetes.io/instance: "{{ .Release.Name }}"
+    app.kubernetes.io/version: "{{ .Chart.AppVersion }}"
+    app.kubernetes.io/managed-by: "{{ .Release.Service }}"
 spec:
   replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
       app: fastapi-app
+      app.kubernetes.io/name: fastapi-chart
+      app.kubernetes.io/instance: {{ .Release.Name }}
   template:
     metadata:
       labels:
         app: fastapi-app
+        app.kubernetes.io/name: fastapi-chart
+        app.kubernetes.io/instance: "{{ .Release.Name }}"
+        app.kubernetes.io/version: "{{ .Chart.AppVersion }}"
+        app.kubernetes.io/managed-by: "{{ .Release.Service }}"
     spec:
       containers:
         - name: fastapi
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          image: {{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
-            - containerPort: 80
+            - containerPort: 8000
