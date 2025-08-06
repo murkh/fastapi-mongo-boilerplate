@@ -5,28 +5,18 @@ from pydantic_settings import BaseSettings
 
 
 class AppSettings(BaseSettings):
-    APP_NAME: str = getenv("APP_NAME", default="File Explorer API")
+    APP_NAME: str = getenv("APP_NAME", default="FastAPI MongoDB Boilerplate")
     APP_DESCRIPTION: str | None = getenv(
-        "APP_DESCRIPTION", default="Basic App to explorer the contents of a storage provider")
-    APP_VERSION: str | None = getenv("APP_VERSION", default=None)
+        "APP_DESCRIPTION", default="FastAPI boilerplate with Motor (MongoDB async driver)"
+    )
+    APP_VERSION: str | None = getenv("APP_VERSION", default="0.1.0")
 
 
-class CloudServiceProviderSettings(BaseSettings):
-    PROVIDER_NAME: str
-
-
-class AWSServiceProviderSettings(CloudServiceProviderSettings):
-    PROVIDER_NAME: str = "aws"
-    AWS_ACCESS_KEY_ID: str | None = getenv("AWS_ACCESS_KEY_ID", default=None)
-    AWS_SECRET_ACCESS_KEY: SecretStr = SecretStr(
-        getenv("AWS_SECRET_ACCESS_KEY", default=""))
-    AWS_REGION: str | None = getenv("AWS_REGION", default=None)
-    AWS_S3_BUCKET_NAME: str | None = getenv("AWS_S3_BUCKET_NAME")
-
-
-class LocalStorageProviderSettings(CloudServiceProviderSettings):
-    PROVIDER_NAME: str = "local"
-    LOCAL_STORAGE_PATH: str = getenv("LOCAL_STORAGE_PATH", default="/tmp")
+class DatabaseSettings(BaseSettings):
+    MONGODB_URL: str = getenv("MONGODB_URL", default="mongodb://localhost:27017")
+    MONGODB_DATABASE: str = getenv("MONGODB_DATABASE", default="fastapi_boilerplate")
+    MONGODB_MAX_POOL_SIZE: int = int(getenv("MONGODB_MAX_POOL_SIZE", default="10"))
+    MONGODB_MIN_POOL_SIZE: int = int(getenv("MONGODB_MIN_POOL_SIZE", default="1"))
 
 
 class EnvironmentOption(Enum):
@@ -37,13 +27,14 @@ class EnvironmentOption(Enum):
 
 class EnvironmentSettings(BaseSettings):
     ENVIRONMENT: EnvironmentOption = getenv(
-        "ENVIRONMENT", default=EnvironmentOption.LOCAL.value)
+        "ENVIRONMENT", default=EnvironmentOption.LOCAL.value
+    )
+    DEBUG: bool = getenv("DEBUG", default="true").lower() == "true"
 
 
 class Settings(
     AppSettings,
-    LocalStorageProviderSettings,
-    AWSServiceProviderSettings,
+    DatabaseSettings,
     EnvironmentSettings
 ):
     pass
