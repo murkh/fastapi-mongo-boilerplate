@@ -1,8 +1,8 @@
 from datetime import datetime
-from typing import Any, Dict, Optional
+from typing import Optional
 
 from bson import ObjectId
-from pydantic import BaseModel, Field, field_validator, ConfigDict
+from pydantic import BaseModel as PydanticBaseModel, Field, field_validator, ConfigDict
 
 
 class PyObjectId(ObjectId):
@@ -15,19 +15,16 @@ class PyObjectId(ObjectId):
         field_schema.update(type="string")
 
 
-class BaseModel(BaseModel):
+class BaseModel(PydanticBaseModel):
     id: Optional[PyObjectId] = Field(default=None, alias="_id")
     created_at: datetime = Field(default_factory=datetime.utcnow)
     updated_at: datetime = Field(default_factory=datetime.utcnow)
 
     @field_validator("id", mode="before")
     @classmethod
-    def validate_id(cls, v):
+    def validate_id(cls, v: Optional[object]) -> PyObjectId | object | None:
         if isinstance(v, str):
             return PyObjectId(v)
         return v
 
-    model_config = ConfigDict(
-        populate_by_name=True,
-        arbitrary_types_allowed=True
-    ) 
+    model_config = ConfigDict(populate_by_name=True, arbitrary_types_allowed=True)

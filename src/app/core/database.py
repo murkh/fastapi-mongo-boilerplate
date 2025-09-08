@@ -10,7 +10,7 @@ class Database:
 db = Database()
 
 
-async def connect_to_mongo():
+async def connect_to_mongo() -> None:
     """Create database connection."""
     db.client = AsyncIOMotorClient(
         settings.MONGODB_URL,
@@ -21,7 +21,7 @@ async def connect_to_mongo():
     print("Connected to MongoDB.")
 
 
-async def close_mongo_connection():
+async def close_mongo_connection() -> None:
     """Close database connection."""
     if db.client:
         db.client.close()

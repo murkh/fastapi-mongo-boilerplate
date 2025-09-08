@@ -1,4 +1,4 @@
-from typing import Any, Dict, Generic, List, Optional, Type, TypeVar, Union
+from typing import Any, Dict, Generic, List, Optional, Type, TypeVar
 
 from bson import ObjectId
 from motor.motor_asyncio import AsyncIOMotorCollection
@@ -36,21 +36,17 @@ class BaseRepository(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
             return self.model(**obj_data)
         return None
 
-    async def get_multi(
-        self, *, skip: int = 0, limit: int = 100
-    ) -> List[ModelType]:
+    async def get_multi(self, *, skip: int = 0, limit: int = 100) -> List[ModelType]:
         """Get multiple documents with pagination."""
         cursor = self.collection.find().skip(skip).limit(limit)
-        documents = await cursor.to_list(length=limit)
+        documents: List[Dict[str, Any]] = await cursor.to_list(length=limit)
         return [self.model(**doc) for doc in documents]
 
-    async def update(
-        self, *, id: str, obj_in: UpdateSchemaType
-    ) -> Optional[ModelType]:
+    async def update(self, *, id: str, obj_in: UpdateSchemaType) -> Optional[ModelType]:
         """Update a document."""
         if not ObjectId.is_valid(id):
             return None
-        
+
         update_data = obj_in.model_dump(exclude_unset=True)
         if update_data:
             update_data["updated_at"] = update_data.get("updated_at")
@@ -66,60 +62,57 @@ class BaseRepository(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
         if not ObjectId.is_valid(id):
             return False
         result = await self.collection.delete_one({"_id": ObjectId(id)})
-        return result.deleted_count > 0
+        return bool(result.deleted_count)
 
     async def count(self) -> int:
         """Count total documents in collection."""
-        return await self.collection.count_documents({})
+        count: int = await self.collection.count_documents({})
+        return count
 
     async def exists(self, id: str) -> bool:
         """Check if document exists."""
         if not ObjectId.is_valid(id):
             return False
-        result = await self.collection.count_documents({"_id": ObjectId(id)})
+        result: int = await self.collection.count_documents({"_id": ObjectId(id)})
         return result > 0
 
     # Aggregation Pipeline Methods
     async def aggregate(
-        self, 
-        pipeline: List[Dict[str, Any]], 
-        allow_disk_use: bool = False
+        self, pipeline: List[Dict[str, Any]], allow_disk_use: bool = False
     ) -> List[Dict[str, Any]]:
         """
         Execute an aggregation pipeline.
-        
+
         Args:
             pipeline: List of aggregation stages
             allow_disk_use: Whether to allow disk use for large operations
-            
+
         Returns:
             List of aggregation results
         """
         try:
-            cursor = self.collection.aggregate(
-                pipeline, 
-                allowDiskUse=allow_disk_use
-            )
-            return await cursor.to_list(length=None)
+            cursor = self.collection.aggregate(pipeline, allowDiskUse=allow_disk_use)
+            results: List[Dict[str, Any]] = await cursor.to_list(length=None)
+            return results
         except Exception as e:
             # Log the error in production
             print(f"Aggregation error: {e}")
             return []
 
     async def aggregate_with_model(
-        self, 
-        pipeline: List[Dict[str, Any]], 
+        self,
+        pipeline: List[Dict[str, Any]],
         model_class: Optional[Type[ModelType]] = None,
-        allow_disk_use: bool = False
+        allow_disk_use: bool = False,
     ) -> List[ModelType]:
         """
         Execute an aggregation pipeline and return results as model instances.
-        
+
         Args:
             pipeline: List of aggregation stages
             model_class: Model class to instantiate results (defaults to self.model)
             allow_disk_use: Whether to allow disk use for large operations
-            
+
         Returns:
             List of model instances
         """
@@ -128,17 +121,15 @@ class BaseRepository(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
         return [model(**doc) for doc in results]
 
     async def aggregate_single(
-        self, 
-        pipeline: List[Dict[str, Any]], 
-        allow_disk_use: bool = False
+        self, pipeline: List[Dict[str, Any]], allow_disk_use: bool = False
     ) -> Optional[Dict[str, Any]]:
         """
         Execute an aggregation pipeline and return the first result.
-        
+
         Args:
             pipeline: List of aggregation stages
             allow_disk_use: Whether to allow disk use for large operations
-            
+
         Returns:
             First aggregation result or None
         """
@@ -146,21 +137,19 @@ class BaseRepository(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
         return results[0] if results else None
 
     async def aggregate_count(
-        self, 
-        pipeline: List[Dict[str, Any]], 
-        allow_disk_use: bool = False
+        self, pipeline: List[Dict[str, Any]], allow_disk_use: bool = False
     ) -> int:
         """
         Execute an aggregation pipeline and return the count.
-        
+
         Args:
             pipeline: List of aggregation stages
             allow_disk_use: Whether to allow disk use for large operations
-            
+
         Returns:
             Count from aggregation result
         """
         # Add $count stage to the end of the pipeline
         count_pipeline = pipeline + [{"$count": "total"}]
         result = await self.aggregate_single(count_pipeline, allow_disk_use)
-        return result.get("total", 0) if result else 0 
+        return int(result.get("total", 0) if result else 0)

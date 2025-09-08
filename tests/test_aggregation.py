@@ -1,5 +1,4 @@
 import pytest
-from datetime import datetime, timedelta
 from unittest.mock import AsyncMock, patch, MagicMock
 
 from src.app.repositories.user import UserRepository
@@ -9,7 +8,7 @@ from src.app.services.user import UserService
 @pytest.fixture
 def mock_database():
     """Mock database connection."""
-    with patch('src.app.repositories.base.get_database') as mock_get_db:
+    with patch("src.app.repositories.base.get_database") as mock_get_db:
         mock_db = MagicMock()
         mock_collection = AsyncMock()
         mock_db.__getitem__.return_value = mock_collection
@@ -47,14 +46,16 @@ class TestUserRepositoryAggregation:
             "superusers": [{"count": 5}],
             "users_by_month": [
                 {"_id": {"year": 2024, "month": 1}, "count": 20},
-                {"_id": {"year": 2024, "month": 2}, "count": 25}
+                {"_id": {"year": 2024, "month": 2}, "count": 25},
             ],
-            "average_username_length": [{"avg_length": 8.5}]
+            "average_username_length": [{"avg_length": 8.5}],
         }
-        
-        with patch.object(user_repository, 'aggregate_single', return_value=mock_result):
+
+        with patch.object(
+            user_repository, "aggregate_single", return_value=mock_result
+        ):
             result = await user_repository.get_user_statistics()
-            
+
             assert result["total_users"] == 100
             assert result["active_users"] == 85
             assert result["superusers"] == 5
@@ -64,9 +65,9 @@ class TestUserRepositoryAggregation:
     @pytest.mark.asyncio
     async def test_get_user_statistics_empty(self, user_repository):
         """Test user statistics when no data exists."""
-        with patch.object(user_repository, 'aggregate_single', return_value=None):
+        with patch.object(user_repository, "aggregate_single", return_value=None):
             result = await user_repository.get_user_statistics()
-            
+
             assert result["total_users"] == 0
             assert result["active_users"] == 0
             assert result["superusers"] == 0
@@ -82,20 +83,20 @@ class TestUserRepositoryAggregation:
                 "count": 85,
                 "users": [
                     {"id": "1", "username": "user1", "email": "user1@example.com"}
-                ]
+                ],
             },
             {
                 "status": "inactive",
                 "count": 15,
                 "users": [
                     {"id": "2", "username": "user2", "email": "user2@example.com"}
-                ]
-            }
+                ],
+            },
         ]
-        
-        with patch.object(user_repository, 'aggregate', return_value=mock_result):
+
+        with patch.object(user_repository, "aggregate", return_value=mock_result):
             result = await user_repository.get_users_by_activity_status(limit=5)
-            
+
             assert len(result) == 2
             assert result[0]["status"] == "active"
             assert result[0]["count"] == 85
@@ -112,13 +113,13 @@ class TestUserRepositoryAggregation:
                 "email": "user1@example.com",
                 "days_since_created": 5,
                 "has_full_name": True,
-                "email_domain": "@example.com"
+                "email_domain": "@example.com",
             }
         ]
-        
-        with patch.object(user_repository, 'aggregate', return_value=mock_result):
+
+        with patch.object(user_repository, "aggregate", return_value=mock_result):
             result = await user_repository.get_recent_users_with_details(days=30)
-            
+
             assert len(result) == 1
             assert result[0]["username"] == "user1"
             assert result[0]["days_since_created"] == 5
@@ -135,7 +136,7 @@ class TestUserRepositoryAggregation:
                 "new_users": 20,
                 "active_users": 18,
                 "superusers": 2,
-                "month_name": "January"
+                "month_name": "January",
             },
             {
                 "year": 2024,
@@ -143,13 +144,13 @@ class TestUserRepositoryAggregation:
                 "new_users": 25,
                 "active_users": 22,
                 "superusers": 3,
-                "month_name": "February"
-            }
+                "month_name": "February",
+            },
         ]
-        
-        with patch.object(user_repository, 'aggregate', return_value=mock_result):
+
+        with patch.object(user_repository, "aggregate", return_value=mock_result):
             result = await user_repository.get_user_growth_trend(months=12)
-            
+
             assert len(result) == 2
             assert result[0]["year"] == 2024
             assert result[0]["month"] == 1
@@ -165,22 +166,20 @@ class TestUserRepositoryAggregation:
                     "_id": "1",
                     "username": "user1",
                     "email": "user1@example.com",
-                    "is_active": True
+                    "is_active": True,
                 }
             ],
             "total": [{"count": 1}],
-            "facets": [
-                {"_id": True, "count": 1}
-            ]
+            "facets": [{"_id": True, "count": 1}],
         }
-        
-        with patch.object(user_repository, 'aggregate_single', return_value=mock_result):
+
+        with patch.object(
+            user_repository, "aggregate_single", return_value=mock_result
+        ):
             result = await user_repository.search_users_advanced(
-                search_term="user1",
-                limit=20,
-                skip=0
+                search_term="user1", limit=20, skip=0
             )
-            
+
             assert len(result["data"]) == 1
             assert result["total"] == 1
             assert len(result["facets"]) == 1
@@ -189,13 +188,11 @@ class TestUserRepositoryAggregation:
     @pytest.mark.asyncio
     async def test_search_users_advanced_empty(self, user_repository):
         """Test advanced user search with no results."""
-        with patch.object(user_repository, 'aggregate_single', return_value=None):
+        with patch.object(user_repository, "aggregate_single", return_value=None):
             result = await user_repository.search_users_advanced(
-                search_term="nonexistent",
-                limit=20,
-                skip=0
+                search_term="nonexistent", limit=20, skip=0
             )
-            
+
             assert result["data"] == []
             assert result["total"] == 0
             assert result["facets"] == []
@@ -213,12 +210,14 @@ class TestUserServiceAggregation:
             "active_users": 85,
             "superusers": 5,
             "users_by_month": [],
-            "average_username_length": 8.5
+            "average_username_length": 8.5,
         }
-        
-        with patch.object(user_service.repository, 'get_user_statistics', return_value=mock_stats):
+
+        with patch.object(
+            user_service.repository, "get_user_statistics", return_value=mock_stats
+        ):
             result = await user_service.get_user_statistics()
-            
+
             assert result["total_users"] == 100
             assert result["active_users"] == 85
             assert result["superusers"] == 5
@@ -230,17 +229,18 @@ class TestUserServiceAggregation:
             "data": [{"username": "user1"}],
             "total": 1,
             "facets": [],
-            "pagination": {"has_more": False}
+            "pagination": {"has_more": False},
         }
-        
-        with patch.object(user_service.repository, 'search_users_advanced', return_value=mock_search_result):
+
+        with patch.object(
+            user_service.repository,
+            "search_users_advanced",
+            return_value=mock_search_result,
+        ):
             result = await user_service.search_users_advanced(
-                search_term="user1",
-                filters={"is_active": True},
-                limit=20,
-                skip=0
+                search_term="user1", filters={"is_active": True}, limit=20, skip=0
             )
-            
+
             assert len(result["data"]) == 1
             assert result["total"] == 1
 
@@ -252,20 +252,20 @@ class TestBaseRepositoryAggregation:
     async def test_aggregate_method(self, mock_database):
         """Test basic aggregation method."""
         from src.app.repositories.base import BaseRepository
-        from src.app.models.user import User, UserCreate, UserUpdate
-        
+        from src.app.models.user import User
+
         mock_db, mock_collection = mock_database
         repo = BaseRepository(User, "users")
         repo.collection = mock_collection
-        
+
         # Mock the aggregate method directly
         async def mock_aggregate(pipeline, allowDiskUse=False):
             return [{"_id": "1", "username": "user1"}]
-        
-        with patch.object(repo, 'aggregate', side_effect=mock_aggregate):
+
+        with patch.object(repo, "aggregate", side_effect=mock_aggregate):
             pipeline = [{"$match": {"is_active": True}}]
             result = await repo.aggregate(pipeline)
-            
+
             assert len(result) == 1
             assert result[0]["username"] == "user1"
 
@@ -273,20 +273,26 @@ class TestBaseRepositoryAggregation:
     async def test_aggregate_with_model(self, mock_database):
         """Test aggregation with model instantiation."""
         from src.app.repositories.base import BaseRepository
-        from src.app.models.user import User, UserCreate, UserUpdate
-        
+        from src.app.models.user import User
+
         mock_db, mock_collection = mock_database
         repo = BaseRepository(User, "users")
         repo.collection = mock_collection
-        
+
         # Mock the aggregate method directly
         async def mock_aggregate(pipeline, allowDiskUse=False):
-            return [{"_id": "507f1f77bcf86cd799439011", "username": "user1", "email": "user1@example.com"}]
-        
-        with patch.object(repo, 'aggregate', side_effect=mock_aggregate):
+            return [
+                {
+                    "_id": "507f1f77bcf86cd799439011",
+                    "username": "user1",
+                    "email": "user1@example.com",
+                }
+            ]
+
+        with patch.object(repo, "aggregate", side_effect=mock_aggregate):
             pipeline = [{"$match": {"is_active": True}}]
             result = await repo.aggregate_with_model(pipeline)
-            
+
             assert len(result) == 1
             assert isinstance(result[0], User)
             assert result[0].username == "user1"
@@ -295,18 +301,18 @@ class TestBaseRepositoryAggregation:
     async def test_aggregate_count(self, mock_database):
         """Test aggregation count method."""
         from src.app.repositories.base import BaseRepository
-        from src.app.models.user import User, UserCreate, UserUpdate
-        
+        from src.app.models.user import User
+
         mock_db, mock_collection = mock_database
         repo = BaseRepository(User, "users")
         repo.collection = mock_collection
-        
+
         # Mock the aggregate method directly
         async def mock_aggregate(pipeline, allowDiskUse=False):
             return [{"total": 5}]
-        
-        with patch.object(repo, 'aggregate', side_effect=mock_aggregate):
+
+        with patch.object(repo, "aggregate", side_effect=mock_aggregate):
             pipeline = [{"$match": {"is_active": True}}]
             result = await repo.aggregate_count(pipeline)
-            
-            assert result == 5 
+
+            assert result == 5

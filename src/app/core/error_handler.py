@@ -1,5 +1,5 @@
 import traceback
-from fastapi import Request
+from fastapi import Request, FastAPI
 from fastapi.responses import JSONResponse
 
 
@@ -14,12 +14,12 @@ async def general_exception_handler(request: Request, exc: Exception) -> JSONRes
         content={
             "detail": "Internal Server Error",
             "error": str(exc),
-            "stack_trace": stack_trace
-        }
+            "stack_trace": stack_trace,
+        },
     )
 
 
-def setup_exception_handlers(app):
+def setup_exception_handlers(app: FastAPI) -> None:
     """
     Setup exception handlers for the FastAPI application.
     """

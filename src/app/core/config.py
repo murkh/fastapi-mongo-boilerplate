@@ -1,13 +1,14 @@
 from enum import Enum
 from os import getenv
-from pydantic import SecretStr
 from pydantic_settings import BaseSettings
+from pydantic import field_validator
 
 
 class AppSettings(BaseSettings):
     APP_NAME: str = getenv("APP_NAME", default="FastAPI MongoDB Boilerplate")
     APP_DESCRIPTION: str | None = getenv(
-        "APP_DESCRIPTION", default="FastAPI boilerplate with Motor (MongoDB async driver)"
+        "APP_DESCRIPTION",
+        default="FastAPI boilerplate with Motor (MongoDB async driver)",
     )
     APP_VERSION: str | None = getenv("APP_VERSION", default="0.1.0")
 
@@ -26,17 +27,23 @@ class EnvironmentOption(Enum):
 
 
 class EnvironmentSettings(BaseSettings):
-    ENVIRONMENT: EnvironmentOption = getenv(
-        "ENVIRONMENT", default=EnvironmentOption.LOCAL.value
-    )
+    ENVIRONMENT: EnvironmentOption = EnvironmentOption.LOCAL
     DEBUG: bool = getenv("DEBUG", default="true").lower() == "true"
 
+    @field_validator("ENVIRONMENT", mode="before")
+    @classmethod
+    def parse_environment(cls, v: str | EnvironmentOption) -> EnvironmentOption:
+        if isinstance(v, EnvironmentOption):
+            return v
+        # Fallback to env var if direct value provided
+        value = v or getenv("ENVIRONMENT", default=EnvironmentOption.LOCAL.value)
+        try:
+            return EnvironmentOption(str(value).lower())
+        except Exception:
+            return EnvironmentOption.LOCAL
 
-class Settings(
-    AppSettings,
-    DatabaseSettings,
-    EnvironmentSettings
-):
+
+class Settings(AppSettings, DatabaseSettings, EnvironmentSettings):
     pass
 
 
