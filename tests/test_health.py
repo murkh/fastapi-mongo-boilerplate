@@ -16,4 +16,4 @@ def test_health_check(client):
     data = response.json()
     assert data["status"] == "healthy"
     assert "timestamp" in data
-    assert data["service"] == "FastAPI MongoDB Boilerplate" 
+    assert data["service"] == "FastAPI MongoDB Boilerplate"

@@ -7,19 +7,19 @@ from ..repositories.user import UserRepository
 class UserService:
     """User service for business logic operations."""
 
-    def __init__(self):
-        self.repository = UserRepository()
+    def __init__(self) -> None:
+        self.repository: UserRepository = UserRepository()
 
     async def create_user(self, user_in: UserCreate) -> User:
         """Create a new user with validation."""
         # Check if email is already taken
         if await self.repository.is_email_taken(user_in.email):
             raise ValueError("Email already registered")
-        
+
         # Check if username is already taken
         if await self.repository.is_username_taken(user_in.username):
             raise ValueError("Username already taken")
-        
+
         return await self.repository.create_user(user_in)
 
     async def get_user(self, user_id: str) -> Optional[User]:
@@ -44,17 +44,17 @@ class UserService:
         existing_user = await self.repository.get(user_id)
         if not existing_user:
             return None
-        
+
         # Check if new email is already taken by another user
         if user_in.email and user_in.email != existing_user.email:
             if await self.repository.is_email_taken(user_in.email):
                 raise ValueError("Email already registered")
-        
+
         # Check if new username is already taken by another user
         if user_in.username and user_in.username != existing_user.username:
             if await self.repository.is_username_taken(user_in.username):
                 raise ValueError("Username already taken")
-        
+
         return await self.repository.update(id=user_id, obj_in=user_in)
 
     async def delete_user(self, user_id: str) -> bool:
@@ -75,11 +75,15 @@ class UserService:
         """Get comprehensive user statistics."""
         return await self.repository.get_user_statistics()
 
-    async def get_users_by_activity_status(self, limit: int = 10) -> List[Dict[str, Any]]:
+    async def get_users_by_activity_status(
+        self, limit: int = 10
+    ) -> List[Dict[str, Any]]:
         """Get users grouped by activity status."""
         return await self.repository.get_users_by_activity_status(limit)
 
-    async def get_recent_users_with_details(self, days: int = 30) -> List[Dict[str, Any]]:
+    async def get_recent_users_with_details(
+        self, days: int = 30
+    ) -> List[Dict[str, Any]]:
         """Get recent users with computed fields."""
         return await self.repository.get_recent_users_with_details(days)
 
@@ -94,7 +98,7 @@ class UserService:
         sort_by: str = "created_at",
         sort_order: int = -1,
         limit: int = 20,
-        skip: int = 0
+        skip: int = 0,
     ) -> Dict[str, Any]:
         """Advanced user search with aggregation pipeline."""
         return await self.repository.search_users_advanced(
@@ -103,5 +107,5 @@ class UserService:
             sort_by=sort_by,
             sort_order=sort_order,
             limit=limit,
-            skip=skip
-        ) 
+            skip=skip,
+        )

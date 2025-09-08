@@ -1,5 +1,5 @@
 from contextlib import asynccontextmanager
-from typing import Any
+from typing import Any, AsyncIterator
 
 from fastapi import APIRouter, FastAPI
 
@@ -12,7 +12,7 @@ from .error_handler import setup_exception_handlers
 
 
 @asynccontextmanager
-async def lifespan(app: FastAPI):
+async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     """Application lifespan manager."""
     # Startup
     await connect_to_mongo()
@@ -23,13 +23,9 @@ async def lifespan(app: FastAPI):
 
 def create_application(
     router: APIRouter,
-    settings: (
-        AppSettings
-        | EnvironmentSettings
-    ),
+    settings: (AppSettings | EnvironmentSettings),
     **kwargs: Any,
 ) -> FastAPI:
-
     if isinstance(settings, AppSettings):
         to_update = {
             "title": settings.APP_NAME,

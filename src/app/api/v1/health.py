@@ -15,13 +15,13 @@ async def health_check() -> Dict[str, str]:
     return {
         "status": "healthy",
         "timestamp": datetime.now(timezone.utc).isoformat(),
-        "service": "FastAPI MongoDB Boilerplate"
+        "service": "FastAPI MongoDB Boilerplate",
     }
 
 
 @router.get("/db")
 async def database_health_check(
-    db: AsyncIOMotorDatabase = Depends(get_database)
+    db: AsyncIOMotorDatabase = Depends(get_database),
 ) -> Dict[str, str]:
     """Database health check endpoint."""
     try:
@@ -30,12 +30,12 @@ async def database_health_check(
         return {
             "status": "healthy",
             "database": "connected",
-            "timestamp": datetime.now(timezone.utc).isoformat()
+            "timestamp": datetime.now(timezone.utc).isoformat(),
         }
     except Exception as e:
         return {
             "status": "unhealthy",
             "database": "disconnected",
             "error": str(e),
-            "timestamp": datetime.now(timezone.utc).isoformat()
-        } 
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+        }

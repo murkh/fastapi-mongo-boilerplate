@@ -7,6 +7,7 @@ from .base import BaseModel as BaseModelWithId
 
 class User(BaseModelWithId):
     """User model for database operations."""
+
     email: EmailStr = Field(..., description="User email address")
     username: str = Field(..., min_length=3, max_length=50)
     full_name: Optional[str] = Field(None, max_length=100)
@@ -17,6 +18,7 @@ class User(BaseModelWithId):
 
 class UserCreate(BaseModel):
     """User creation model."""
+
     email: EmailStr
     username: str = Field(..., min_length=3, max_length=50)
     full_name: Optional[str] = Field(None, max_length=100)
@@ -25,6 +27,7 @@ class UserCreate(BaseModel):
 
 class UserUpdate(BaseModel):
     """User update model."""
+
     email: Optional[EmailStr] = None
     username: Optional[str] = Field(None, min_length=3, max_length=50)
     full_name: Optional[str] = Field(None, max_length=100)
@@ -34,4 +37,5 @@ class UserUpdate(BaseModel):
 
 class UserInDB(User):
     """User model with hashed password for database storage."""
-    hashed_password: str 
+
+    hashed_password: str

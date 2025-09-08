@@ -16,25 +16,21 @@ class CustomException(HTTPException):
 
 class BadRequestException(CustomException):
     def __init__(self, detail: Union[str, None] = None):
-        super().__init__(
-            status_code=status.HTTP_400_BAD_REQUEST, detail=detail
-        )
+        super().__init__(status_code=status.HTTP_400_BAD_REQUEST, detail=detail)
 
 
 class NotFoundException(CustomException):
     def __init__(self, detail: Union[str, None] = None):
-        super().__init__(
-            status_code=status.HTTP_404_NOT_FOUND, detail=detail
-        )
+        super().__init__(status_code=status.HTTP_404_NOT_FOUND, detail=detail)
 
 
 class UnauthorizedException(CustomException):
     def __init__(self, detail: Union[str, None] = None):
-        super().__init__(
-            status_code=status.HTTP_401_UNAUTHORIZED, detail=detail
-        )
+        super().__init__(status_code=status.HTTP_401_UNAUTHORIZED, detail=detail)
 
 
 class InternalServerException(CustomException):
     def __init__(self, detail: Union[str | None] = None):
-        super().__init__(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=detail)
+        super().__init__(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=detail
+        )
